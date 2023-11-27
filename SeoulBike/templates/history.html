@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block content %}
+<br>
+<br>
+<br>
+<p class="bike_subtitle">사용량 비교하기</p>
+<hr>
+<table>
+  <tr>
+    <td>전체 이용 횟수</td>
+    <td>전체 이용 시간</td>
+    <td>하루 평균 이용 시간</td>
+    <td>전체 이동량</td>
+    <td>자주 이용한 대여소</td>
+  </tr>
+  <tr>
+    <td class="bike_content1">{{ history_list|length }}회</td>
+    <td class="bike_content1">{{ total_time }}</td>
+    <td class="bike_content1">{{ average_time }}</td>
+    <td class="bike_content1">{{ '%.2f'|format(total_distance*0.001) }} km</td>
+    <td class="bike_content1">{{ place }}</td>
+  </tr>
+</table>
+<hr>
+<br>
+<br>
+<br>
+<p class="bike_subtitle">{{ current_month }}월 이용 시간 변화</p>
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+
+<script>
+  const ctx = document.getElementById('myChart');
+  // const ctx_label = 
+  const ctx_data = {{ monthly_distances|tojson }};
+  const ctx_labels = {{ date_labels|tojson }};
+  console.log(ctx_data);
+  console.log(ctx_labels);
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ctx_labels,
+      datasets: [{
+        label: '# of total time',
+        data: ctx_data,
+        backgroundColor: 'rgba(0, 176, 122, 0.7)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+          x: {
+            grid: {
+              display: false, 
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            }
+          }
+        }
+    }
+  });
+</script>
+
+<br>
+<br>
+<br>
+<div class="flex-container">
+  <p class="bike_subtitle">따릉이 이용내역 전체보기</p>
+  <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#myModal">
+    이용내역 추가하기
+  </button>
+</div>
+{% if history_list %}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">대여 날짜</th>
+      <th scope="col">대여한 대여소</th>
+      <th scope="col">반납한 대여소</th>
+      <th scope="col">대여 시간</th>
+      <th scope="col">반납 시간</th>
+      <th scope="col">이동거리 (km)</th>
+    </tr>
+  </thead>
+  {% for history in history_list %}
+  <tbody>
+    <tr>
+      <th scope="row">{{ history.id }}</th>
+      <td>{{ history.rent_date }}</td>
+      <td>{{ history.rent_place }}</td>
+      <td>{{ history.return_place }}</td>
+      <td>{{ history.rent_time }}</td>
+      <td>{{ history.return_time }}</td>
+      <td>{{ '%.3f'|format(history.distance*0.001) }}</td>
+    </tr>
+  </tbody>
+  {% endfor %}
+</table>
+{% else %}
+<p>추가된 이용내역이 없습니다.</p>
+{% endif %}
+
+<!-- 이용내역 추가 모달 -->
+<div class="modal fade" style="margin: 0 100px 0 100px;" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <form method="POST" action="{{url_for('main.submit') }}">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="row justify-content-start modal-container">
+              <label class="bike_content1 modal-title">대여 날짜</label>
+              <dic class="col-sm-5">
+                <input id="rent_date" name="rent_date" class="form-control bike_description" type="date" />
+              </dic>
+            </div>
+            <div class="mb-3 modal-container">
+              <label class="bike_content1 modal-title">대여한 대여소 / 반납한 대여소</label>
+              <div class="row justify-content-start">
+                <div class="col-sm-5">
+                  <input type="text" name="rent-place" class="form-control bike_description" id="rent-place">
+                </div>
+                <div class="col-sm-1">
+                  <label class="bike_description">/</label>
+                </div>
+                <div class="col-sm-5">
+                  <input type="text" name="return-place" class="form-control" id="return-place">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3 modal-container">
+              <label class="bike_content1 modal-title">대여 시간 / 반납 시간</label>
+              <div class="row justify-content-start">
+                <div class="col-sm-5">
+                  <input type="time" name="rent-time" class="form-control bike_description" id="rent-time">
+                </div>
+                <div class="col-sm-1">
+                  <label class="bike_description">/</label>
+                </div>
+                <div class="col-sm-5">
+                  <input type="time" name="return-time" class="form-control bike_description" id="return-time">
+                </div>
+              </div>
+            </div>
+            <div class="mb-3 modal-container">
+              <label class="bike_content1 modal-title">이동거리</label>
+              <div class="row justify-content-start">
+                <div class="col-5">
+                  <input type="number" step="any" name="distance" class="form-control bike_description" id="distance">
+                </div>
+                <div class="col-1">
+                  <label class="bike_description" style="text-align: left;">m</label>
+                </div>
+              </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+          <button type="submit" class="btn btn-primary">확인</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

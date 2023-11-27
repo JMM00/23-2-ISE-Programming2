@@ -1,0 +1,55 @@
+/* 폰트 */
+.bike_subtitle {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+}
+
+.bike_content1 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #000;
+}
+
+.bike_content1_regular {
+    font-size: 20px;
+    font-weight: regular;
+    color: #000;
+}
+
+.bike_content2 {
+    font-size: 17px;
+    font-weight: regular;
+    color: #000;
+}
+
+.bike_description {
+    font-size: 14px;
+    font-weight: regular;
+    color: #000;
+}
+
+/* 네비게이션 스타일 */
+.nav_color {
+    background-color: var(--dark-gray);
+}
+
+
+.flex-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+}
+
+.modal-title {
+    padding: 0 0 20px 0;
+}
+
+.modal-container {
+    padding: 0 0 30px 0;
+}
+
+.table thead th {
+    background-color: var(--main-green); /* 원하는 색상으로 변경 */
+    color: #fff; /* 글자 색상 변경 */
+}

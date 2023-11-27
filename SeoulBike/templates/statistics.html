@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block content %}
+<br>
+<br>
+<br>
+<p class="bike_subtitle">사용량 비교하기</p>
+<hr>
+<form method="POST" action="{{url_for('main.compare') }}">
+  <table>
+    <tr>
+      <td class="bike_content2">성별 선택</td>
+      <td class="bike_content2">연령대 선택</td>
+      <td class="bike_content2">몸무게 입력</td>
+      <td rowspan="3">
+        <button type="submit" class="btn btn-success"
+          style="padding: 26px 20px; color: white; border-radius: 20px;">비교하기</button>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="row justify-content-start" style="margin: 0 0 0 3px;">
+          <div class="form-check col-sm-3">
+            <input class="form-check-input" type="radio" name="gender" id="inlineRadio1" value="F">
+            <label class="form-check-label bike_content1_regular" for="inlineRadio1">여성</label>
+          </div>
+          <div class="form-check col-sm-3">
+            <input class="form-check-input" type="radio" name="gender" id="inlineRadio2" value="M">
+            <label class="form-check-label bike_content1_regular" for="inlineRadio2">남성</label>
+          </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+      </td>
+      <td>
+        <div class="col-sm-5">
+          <input class="form-control" name="age" list="datalistOptions" id="exampleDataList" placeholder="선택하기">
+          <datalist id="datalistOptions">
+            <option value="~10대">
+            <option value="20대">
+            <option value="30대">
+            <option value="40대">
+            <option value="50대">
+            <option value="60대">
+            <option value="70대이상">
+          </datalist>
+        </div>
+      </td>
+      <td>
+        <div class="row justify-content-start">
+          <div class="col-sm-5">
+            <input type="number" step="any" name="weight" class="form-control bike_description" id="weight">
+          </div>
+          <div class="col-sm-1">
+            <label class="bike_content1">kg</label>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="bike_description" style="padding: 0 0 0 10px;">동일 성별 평균 이용량을 비교하기 위해 이용합니다.</td>
+      <td class="bike_description" style="padding: 0 0 0 10px;">연령대 평균과 비교하기 위해 이용합니다.</td>
+      <td class="bike_description" style="padding: 0 0 0 10px;">운동량을 계산하기 위해서 이용합니다.</td>
+    </tr>
+  </table>
+</form>
+<hr>
+<br>
+<br>
+<br>
+{% if is_not_null %}
+<p class="bike_subtitle">전체 사용자 정보 확인하기</p>
+<hr>
+<table>
+  <tr>
+    <td>평균 운동량</td>
+    <td>평균 탄소 감축량</td>
+    <td>평균 이용시간</td>
+    <td>평균 이용거리</td>
+  </tr>
+  <tr>
+    <td class="bike_content1">{{ '%.2f'|format(tota_average_data['운동량']) }} kcal</td>
+    <td class="bike_content1">{{ '%.2f'|format(tota_average_data['탄소량']) }} kg</td>
+    <td class="bike_content1">{{ '%.2f'|format(tota_average_data['이용거리'] * 0.001) }} km</td>
+    <td class="bike_content1">{{ tota_average_data['이용시간'] }}</td>
+  </tr>
+</table>
+<hr>
+<br>
+<br>
+<br>
+
+<div class="row">
+  <div class="col">
+    <p class="bike_content1">평균 운동량 비교</p>
+    <div>
+      <canvas id="exerciseChart"></canvas>
+    </div>
+  </div>
+  <div class="col">
+    <p class="bike_content1">탄소 감축량 비교</p>
+    <div>
+      <canvas id="carbonChart"></canvas>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <p class="bike_content1">평균 이동거리 비교</p>
+    <div>
+      <canvas id="distanceChart"></canvas>
+    </div>
+  </div>
+  <div class="col">
+    <p class="bike_content1">평균 이용시간 비교</p>
+    <div>
+      <canvas id="timeChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // exercise
+    const exerciseChart = document.getElementById('exerciseChart');
+    const exerciseChart_data = {{ exercise | tojson | safe }};
+    const exerciseChart_labels = ['나의', '전체', '동일 연령대', '동일 성별'];
+
+    new Chart(exerciseChart, {
+      type: 'bar',
+      data: {
+        labels: exerciseChart_labels,
+        datasets: [{
+          label: '# 평균 운동량',
+          data: exerciseChart_data,
+          backgroundColor: 'rgba(0, 176, 122, 0.7)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            grid: {
+              display: false, 
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            }
+          }
+        }
+      }
+    });
+    //carbon
+    const carbonChart = document.getElementById('carbonChart');
+    const carbonChart_data = {{ distance| tojson }};
+    const carbonChart_labels = ['나의', '전체', '동일 연령대', '동일 성별'];
+
+    new Chart(carbonChart, {
+      type: 'bar',
+      data: {
+        labels: carbonChart_labels,
+        datasets: [{
+          label: '# 탄소 감축량',
+          data: carbonChart_data,
+          backgroundColor: 'rgba(0, 176, 122, 0.7)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            grid: {
+              display: false, 
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            }
+          }
+        }
+      }
+    });
+
+    // distance
+    const distanceChart = document.getElementById('distanceChart');
+    const distanceChart_data = {{ distance| tojson }};
+    const distanceChart_labels = ['나의', '전체', '동일 연령대', '동일 성별'];
+
+    new Chart(distanceChart, {
+      type: 'bar',
+      data: {
+        labels: distanceChart_labels,
+        datasets: [{
+          label: '# 평균 이용거리',
+          data: distanceChart_data,
+          backgroundColor: 'rgba(0, 176, 122, 0.7)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            grid: {
+              display: false, 
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            }
+          }
+        }
+      }
+    });
+
+    // time
+    const timeChart = document.getElementById('timeChart');
+    const timeChart_data = {{ time| tojson }};
+    const timeChart_labels = ['나의', '전체', '동일 연령대', '동일 성별'];
+
+    new Chart(timeChart, {
+      type: 'bar',
+      data: {
+        labels: timeChart_labels,
+        datasets: [{
+          label: '# 평균 이용시간',
+          data: timeChart_data,
+          backgroundColor: 'rgba(0, 176, 122, 0.7)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          x: {
+            grid: {
+              display: false, 
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            }
+          }
+        }
+      }
+    });
+  </script>
+</div>
+{% endif %}
+
+
+{% endblock %}
